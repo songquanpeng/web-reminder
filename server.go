@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,7 +24,7 @@ type Time struct {
 var storage = sync.Map{}
 var timeout = 10 // unit is minute
 var debug bool
-
+var port = flag.String("port", "3000", "specify the listening port")
 
 func pingHandler(w http.ResponseWriter, r *http.Request) {
 	var request Request
@@ -87,7 +88,7 @@ func getBrowsingTime(host string, ip string) (minutes int) {
 	return
 }
 
-func clearBrowsingTime(host string, ip string)  {
+func clearBrowsingTime(host string, ip string) {
 	currentTime := int(time.Now().Unix())
 	key := ip + host
 	value, ok := storage.Load(key)
@@ -101,16 +102,19 @@ func clearBrowsingTime(host string, ip string)  {
 }
 
 func main() {
+	flag.Parse()
 	debug = os.Getenv("MODE") == "debug"
 	if debug {
 		log.Println("Debug mode enabled.")
 	}
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "80"
+	if *port == "3000" {
+		envPort := os.Getenv("PORT")
+		if envPort != "" {
+			*port = envPort
+		}
 	}
-	log.Println("Starting server at port " + port + ".")
+	log.Println("Starting server at port " + *port + ".")
 	http.HandleFunc("/clear", clearHandler)
 	http.HandleFunc("/", pingHandler)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", *port), nil))
 }

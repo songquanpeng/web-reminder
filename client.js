@@ -13,9 +13,9 @@
 
 (function () {
     'use strict';
-    const serverUrl = "http://home.justsong.cn";
-    const pingInterval = 1; // Unit is second.
-    const maxMinutes = 1;
+    const serverUrl = "https://ping.iamazing.cn";
+    const pingInterval = 60; // Unit is second.
+    const maxMinutes = 10;
     window.pingServer = function () {
         fetch(serverUrl, {
             method: 'POST',
