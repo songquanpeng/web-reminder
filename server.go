@@ -110,7 +110,7 @@ func main() {
 		port = "80"
 	}
 	log.Println("Starting server at port " + port + ".")
-	http.HandleFunc("/", pingHandler)
 	http.HandleFunc("/clear", clearHandler)
+	http.HandleFunc("/", pingHandler)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
