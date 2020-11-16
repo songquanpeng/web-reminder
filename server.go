@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
+	"sync"
 	"time"
 )
 
@@ -15,59 +17,100 @@ type Request struct {
 
 type Time struct {
 	CreationTime int
-	LastTime int
+	LastTime     int
 }
 
-var storage = map[string]Time{}
+var storage = sync.Map{}
 var timeout = 10 // unit is minute
+var debug bool
 
-func handler(w http.ResponseWriter, r *http.Request) {
+
+func pingHandler(w http.ResponseWriter, r *http.Request) {
 	var request Request
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	var minutes = getBrowsingTime(request.Host, r.RemoteAddr)
+	ip := strings.Split(r.RemoteAddr, ":")[0]
+	var minutes = getBrowsingTime(request.Host, ip)
 	_, err = fmt.Fprintf(w, "%d", minutes)
 	if err != nil {
 		log.Fatal(err)
+	}
+	if debug {
+		log.Println(fmt.Sprintf("New request from address: %s, host: %s, return with %d.", ip, request.Host, minutes))
+	}
+}
+
+func clearHandler(w http.ResponseWriter, r *http.Request) {
+	var request Request
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	ip := strings.Split(r.RemoteAddr, ":")[0]
+	clearBrowsingTime(request.Host, ip)
+	http.StatusText(http.StatusAccepted)
+	if debug {
+		log.Println(fmt.Sprintf("Clear counter for address: %s, host: %s.", ip, request.Host))
 	}
 }
 
 func getBrowsingTime(host string, ip string) (minutes int) {
 	currentTime := int(time.Now().Unix())
-	key := ip+host
-	storedTime, ok := storage[key]
+	key := ip + host
+	value, ok := storage.Load(key)
+	var storedTime Time
 	if ok {
+		storedTime = value.(Time)
 		// First we should check if this is a new visit.
-		minutes = (currentTime - storedTime.LastTime) / 60
-		fmt.Println(minutes)
-		if minutes >= timeout {
+		interval := (currentTime - storedTime.LastTime) / 60
+		if interval >= timeout {
 			// This is a new visit
 			storedTime.CreationTime = currentTime
 			storedTime.LastTime = currentTime
 		} else {
 			// Not a new visit, update the last visit time.
 			storedTime.LastTime = currentTime
+			minutes = (currentTime - storedTime.CreationTime) / 60
 		}
 	} else {
 		// This is a new visit.
-		minutes = 0
-		storedTime.CreationTime = currentTime
-		storedTime.LastTime = currentTime
+		storedTime = Time{
+			CreationTime: currentTime,
+			LastTime:     currentTime,
+		}
 	}
-	storage[key] = storedTime
+	storage.Store(key, storedTime)
 	return
 }
 
+func clearBrowsingTime(host string, ip string)  {
+	currentTime := int(time.Now().Unix())
+	key := ip + host
+	value, ok := storage.Load(key)
+	var storedTime Time
+	if ok {
+		storedTime = value.(Time)
+		storedTime.CreationTime = currentTime
+		storedTime.LastTime = currentTime
+		storage.Store(key, storedTime)
+	}
+}
 
-func main()  {
-	http.HandleFunc("/", handler)
+func main() {
+	debug = os.Getenv("MODE") == "debug"
+	if debug {
+		log.Println("Debug mode enabled.")
+	}
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "80"
 	}
 	log.Println("Starting server at port " + port + ".")
+	http.HandleFunc("/", pingHandler)
+	http.HandleFunc("/clear", clearHandler)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
 }
