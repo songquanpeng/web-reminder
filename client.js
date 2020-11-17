@@ -7,8 +7,6 @@
 // @match        http://*/*
 // @match        https://*/*
 // @grant        none
-// @connect      localhost
-// @connect      ping.iamazing.cn
 // ==/UserScript==
 
 (function () {
@@ -57,10 +55,10 @@
         }
     };
 
-    let timer = undefined;
+    let timer = setInterval(window.pingServer, pingInterval * 1000);
     document.addEventListener("visibilitychange", function() {
         if (document.visibilityState === 'visible') {
-            timer = setInterval(window.pingServer, pingInterval * 1000)
+            timer = setInterval(window.pingServer, pingInterval * 1000);
         } else {
             clearInterval(timer)
         }
