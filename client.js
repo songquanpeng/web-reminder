@@ -57,9 +57,12 @@
         }
     };
 
-    function main() {
-        setInterval(window.pingServer, pingInterval * 1000)
-    }
-
-    main();
+    let timer = undefined;
+    document.addEventListener("visibilitychange", function() {
+        if (document.visibilityState === 'visible') {
+            timer = setInterval(window.pingServer, pingInterval * 1000)
+        } else {
+            clearInterval(timer)
+        }
+    });
 })();
