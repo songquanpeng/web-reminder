@@ -15,11 +15,11 @@
     'use strict';
     const serverUrl = "https://ping.iamazing.cn";
     const pingInterval = 60; // Unit is second.
-    const maxMinutes = 10;
+    const maxMinutes = 15;
     window.pingServer = function () {
         fetch(serverUrl, {
             method: 'POST',
-            mode: 'no-cors',
+            mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -28,15 +28,15 @@
             })
         }).then(function (response) {
             return response.text().then(function (minutes) {
-                let counter = parseInt(minutes)
-                window.process(counter);
+                let counter = parseInt(minutes);
+                window.processRequest(counter);
             })
         }).catch(function (reason) {
             console.log(reason)
         })
     };
 
-    window.process = function (minutes) {
+    window.processRequest = function (minutes) {
         if (minutes >= maxMinutes) {
             let choose = confirm(`You have wasted ${minutes} minutes in this site, would you like to close it?`);
             if (choose) {
@@ -45,7 +45,7 @@
             } else {
                 fetch(`${serverUrl}/clear`, {
                     method: 'POST',
-                    mode: 'no-cors',
+                    mode: 'cors',
                     headers: {
                         'Content-Type': 'application/json'
                     },

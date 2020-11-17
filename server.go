@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/rs/cors"
 	"log"
 	"net/http"
 	"os"
@@ -114,7 +115,11 @@ func main() {
 		}
 	}
 	log.Println("Starting server at port " + *port + ".")
-	http.HandleFunc("/clear", clearHandler)
-	http.HandleFunc("/", pingHandler)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", *port), nil))
+	server := http.NewServeMux()
+	server.HandleFunc("/clear", clearHandler)
+	server.HandleFunc("/", pingHandler)
+	c := cors.New(cors.Options{AllowedOrigins: []string{"*"}, AllowOriginFunc: func(origin string) bool {
+		return true
+	}})
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", *port), c.Handler(server)))
 }
