@@ -4,9 +4,10 @@
 // @version      0.1
 // @description  Remind you when you waste too much time on specified websites.
 // @author       JustSong
-// @match        http://*/*
-// @match        https://*/*
-// @grant        none
+// @match        https://www.zhihu.com/*
+// @match        https://www.github.com/*
+// @match        https://*.youtube.com/*
+// @match        https://*.bilibili.com/*
 // ==/UserScript==
 
 (function () {

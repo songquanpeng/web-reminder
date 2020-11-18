@@ -1,4 +1,5 @@
 # Browsing Reminder
+[![Install Script Now](https://img.shields.io/badge/Install%20Script-Now-green)](https://raw.githubusercontent.com/songquanpeng/browsing-reminder/main/client.user.js)
 ## Description
 Remind you when you wasted too much time on specified websites.
 
