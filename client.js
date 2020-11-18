@@ -13,8 +13,9 @@
     'use strict';
     const serverUrl = "https://ping.iamazing.cn";
     const pingInterval = 60; // Unit is second.
-    const maxMinutes = 15;
+    const maxMinutes = 10;
     window.pingServer = function () {
+        console.log("ping~");
         fetch(serverUrl, {
             method: 'POST',
             mode: 'cors',
@@ -35,6 +36,7 @@
     };
 
     window.processRequest = function (minutes) {
+        console.log(`You have wasted ${minutes} minutes.`);
         if (minutes >= maxMinutes) {
             let choose = confirm(`You have wasted ${minutes} minutes in this site, would you like to close it?`);
             if (choose) {
@@ -54,7 +56,7 @@
             }
         }
     };
-
+    window.pingServer();
     let timer = setInterval(window.pingServer, pingInterval * 1000);
     document.addEventListener("visibilitychange", function() {
         if (document.visibilityState === 'visible') {
