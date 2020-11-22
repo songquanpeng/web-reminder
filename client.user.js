@@ -5,7 +5,7 @@
 // @description  Remind you when you waste too much time on specified websites.
 // @author       JustSong
 // @match        https://www.zhihu.com/*
-// @match        https://www.github.com/*
+// @match        https://github.com/*
 // @match        https://*.youtube.com/*
 // @match        https://*.bilibili.com/*
 // ==/UserScript==
@@ -15,6 +15,7 @@
     const serverUrl = "https://ping.iamazing.cn";
     const pingInterval = 60; // Unit is second.
     const maxMinutes = 10;
+    const needConfirm = false;
     window.pingServer = function () {
         console.log("ping~");
         fetch(serverUrl, {
@@ -39,7 +40,10 @@
     window.processRequest = function (minutes) {
         console.log(`You have wasted ${minutes} minutes.`);
         if (minutes >= maxMinutes) {
-            let choose = confirm(`You have wasted ${minutes} minutes in this site, would you like to close it?`);
+            let choose = true;
+            if (needConfirm) {
+                choose = confirm(`You have wasted ${minutes} minutes in this site, would you like to close it?`);
+            }
             if (choose) {
                 // window.close()
                 window.location.href = "https://google.com"
@@ -61,6 +65,7 @@
     let timer = setInterval(window.pingServer, pingInterval * 1000);
     document.addEventListener("visibilitychange", function() {
         if (document.visibilityState === 'visible') {
+            window.pingServer();
             timer = setInterval(window.pingServer, pingInterval * 1000);
         } else {
             clearInterval(timer)
