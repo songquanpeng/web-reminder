@@ -9,6 +9,8 @@
 // @match        https://www.zhihu.com/*
 // @match        https://*.youtube.com/*
 // @match        https://*.bilibili.com/*
+// @match        https://*.reddit.com/*
+// @match        https://zh.wikipedia.org/*
 // ==/UserScript==
 
 (function () {
@@ -50,9 +52,7 @@
                     confirmButtonText: 'Ok',
                     cancelButtonText: 'Nope'
                 }).then((result) => {
-                    if (result.value) {
-                        window.location.href = "https://google.com";
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    if (result.dismiss === Swal.DismissReason.cancel) {
                         Swal.fire(
                             'Notice',
                             'The timer has been reset.',
@@ -68,6 +68,8 @@
                                 Host: window.location.hostname
                             })
                         }).finally()
+                    } else {
+                        window.location.href = "https://google.com";
                     }
                 })
             } else {
@@ -87,9 +89,9 @@
             text: message,
             duration: 5000,
             close: false,
-            gravity: "top",
-            position: "right",
-            backgroundColor: "#48C774",
+            gravity: "bottom",
+            position: "center",
+            backgroundColor: "#ea4335",
             stopOnFocus: true,
         }).showToast();
     };
